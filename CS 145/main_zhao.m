@@ -1,12 +1,12 @@
-train_file = '.\train_1000.csv';
-test_file = '.\test_1000.csv';
-systemCommand = 'C:\Python27\python27.exe generate_train_test_data_1.py 1000';
+train_file = '.\train_3000.csv';
+test_file = '.\test_3000.csv';
+systemCommand = 'C:\Python27\python27.exe generate_train_test_data_1.py 3000';
 system(systemCommand);
 
 fid=fopen(train_file);
 tline = fgetl(fid);
 num_col = length(find(tline==',')) + 1;
-format = ['%d %s' repmat('%f', 1, num_col - 6)];
+format = ['%d %s' repmat('%f', 1, num_col - 24)];
 c = textscan(fid, format, 'Delimiter', ',');
 fclose(fid);
 
@@ -26,7 +26,7 @@ end
 fid2=fopen(test_file);
 tline2 = fgetl(fid2);
 num_col2 = length(find(tline2==',')) + 1;
-format2 = ['%d %s' repmat('%f', 1, num_col2 - 6)];
+format2 = ['%d %s' repmat('%f', 1, num_col2 - 24)];
 c2 = textscan(fid2, format2, 'Delimiter', ',');
 fclose(fid2);
 
@@ -35,10 +35,11 @@ test_ids = c2{1};
 
 %=========================PCA Analysis=====================================
 [COEFF,SCORE] = princomp(train_features);
+train_centered = SCORE*COEFF';
 % ==================svm=================
 %train_features = train_features(:, 1:100);
-svm_train_features = train_features(1:9999, 1:100);
-svm_train_labels = train_labels(1:9999);
+svm_train_features = train_features(:, 1500:2000);
+svm_train_labels = train_labels(:);
 svm_classifier_cv = svmtrain(train_labels, train_features, ['-h 0 -q -v 5 -c 4 -t 2 -g ' num2str(4^(-3))]);  % RBF kernel function C = 4, gamma = 4^-3
 %svm_accu = svmpredict(test_label, test_data, svm_classifier);
 %svm_accuracy = svm_accu(1);
@@ -46,9 +47,9 @@ svm_classifier_cv = svmtrain(train_labels, train_features, ['-h 0 -q -v 5 -c 4 -
 % =============================ensemble====================================
 %ens_classifier = fitensemble(train_data, train_label, 'AdaBoostM1', 100,
 %'Tree'); % LogitBoost, Subspace, Bag ; 'AllPredictorCombinations' ; 'KNN'
-%'Discriminant'
-ens_classifier = fitensemble(train_features, train_labels, 'Bag', 100, 'Tree', 'type', 'classification');
-ens_cv = crossval(ens_classifier, 'KFold', 5);
+%'Discriminant' , 'type', 'classification'
+ens_classifier = fitensemble(train_features, train_labels, 'Subspace', 'AllPredictorCombinations', 'Discriminant', 'type', 'classification');
+ens_cv = crossval(ens_classifier, 'KFold', 3);
 ens_error_rate = kfoldLoss(ens_cv);
 % ens_predictions = predict(ens_classifier, test_data);
 % ens_accuracy = 1 - (nnz(ens_predictions - test_label)/length(test_label));
@@ -71,12 +72,10 @@ log_reg_error_rate = kfoldLoss(log_reg_cv);
 % [~,index_max_prob] = max(log_reg_predictions, [], 2);
 % lg_accuracy = 1 - (nnz(index_max_prob - lg_test_label)/length(lg_test_label));
 % results(t, 1) = lg_accuracy;
-%===========================MATLAB BUILT-IN SVM============================
-% train_features = train_features(1:9999, :);
-% train_labels = train_labels(1:9999, :);
-% m_svm_classifier = fitcsvm(train_features, train_labels);
-% m_svm_cv = crossval(m_svm_classifier, 'KFold', 5);
-% m_svm_error_rate = kfoldLoss(m_svm_cv);
+%===========================Naive Bayes============================
+nb_classifier = fitcnb(train_features,train_labels);
+nb_cv = crossval(nb_classifier, 'KFold', 5);
+nb_error_rate = kfoldLoss(nb_cv);
 
 
 
@@ -96,7 +95,7 @@ prediction_labels = cell(length(svm_predictions), 1);
 for i = 1 : length(svm_predictions)
     prediction_labels{i} = id_to_string(svm_predictions(i));
 end
-out_file = fopen('submission3.csv','w');
+out_file = fopen('submission6.csv','w');
 fprintf(out_file,'id,cuisine\n');
 for i = 1 : length(svm_predictions)
     fprintf(out_file,'%d,%s\n', test_ids(i), prediction_labels{i});

@@ -47,7 +47,7 @@ def main(argv):
     # ingredients in frequency descending order
     frequent_ingredients = sorted(counter, key=counter.get, reverse=True)
     #print len(frequent_ingredients)
-    frequent_ingredients = frequent_ingredients[:frequent]
+    frequent_ingredients = frequent_ingredients[1:frequent]
 
     # pprint(frequentIngredients)
 

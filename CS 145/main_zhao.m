@@ -1,7 +1,7 @@
 % Parse files. Not necessary if files already exist.
-train_file = '.\train_2000.csv';
-test_file = '.\test_2000.csv';
-systemCommand = 'C:\Python27\python27.exe generate_train_test_data_1.py 2000';
+train_file = '.\train_2001.csv';
+test_file = '.\test_2001.csv';
+systemCommand = 'C:\Python27\python27.exe generate_train_test_data_2.py 2001';
 system(systemCommand);
 
 % Generate training features
@@ -44,8 +44,8 @@ test_ids = c2{1};
 %svm_train_features = train_features(:, 1500:2000);
 %svm_train_labels = train_labels(:);
 
-% Cross validation accuracy. Use as test before submission.
-svm_classifier_cv = svmtrain(train_labels, train_features, ['-h 0 -q -v 5 -c 10 -t 2 -g ' num2str(4^(-3))]);  % used 4 for c; RBF kernel function C = 4, gamma = 4^-3
+% Cross validation accuracy. Use as test before submission. 4^(-3)
+svm_classifier_cv = svmtrain(train_labels, train_features, ['-h 0 -q -v 5 -c 10 -t 2 -g ' num2str(4^(-2))]);  % used 4 for c; RBF kernel function C = 4, gamma = 4^-3
 
 %poly_cv_accu = svmtrain(train_labels, train_features, '-h 0 -q -c 0.25 -v 5 -t 1 -d 1');  % Polynomial
 %svm_accu = svmpredict(test_label, test_data, svm_classifier);
@@ -96,14 +96,14 @@ svm_classifier_cv = svmtrain(train_labels, train_features, ['-h 0 -q -v 5 -c 10 
 
 % Run following when generating submission file. Modify file name as
 % necessary.
-svm_classifier = svmtrain(train_labels, train_features, ['-h 0 -q -c 10 -t 2 -g ' num2str(4^(-3))]);  % RBF kernel function C = 4, gamma = 4^-3
+svm_classifier = svmtrain(train_labels, train_features, ['-h 0 -q -c 10 -t 2 -g ' num2str(4^(-2))]);  % RBF kernel function C = 4, gamma = 4^-3
 dummy = zeros(9944, 1);
 [svm_predictions, accuracy, ~] = svmpredict(dummy, test_features, svm_classifier);
 prediction_labels = cell(length(svm_predictions), 1);
 for i = 1 : length(svm_predictions)
     prediction_labels{i} = id_to_string(svm_predictions(i));
 end
-out_file = fopen('submission8.csv','w');
+out_file = fopen('submission10.csv','w');
 fprintf(out_file,'id,cuisine\n');
 for i = 1 : length(svm_predictions)
     fprintf(out_file,'%d,%s\n', test_ids(i), prediction_labels{i});

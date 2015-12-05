@@ -1,5 +1,5 @@
 # generate_train_test_data_1.py
-# Version 3.0
+# Version 4.0
 # Author: Nero Geng, Zhao Yang
 
 # This script generates train and test data files from the original json files downloaded from Kaggle
@@ -47,7 +47,7 @@ def main(argv):
     # ingredients in frequency descending order
     frequent_ingredients = sorted(counter, key=counter.get, reverse=True)
     #print len(frequent_ingredients)
-    frequent_ingredients = frequent_ingredients[1:frequent]
+    frequent_ingredients = frequent_ingredients[:frequent]
 
     # pprint(frequentIngredients)
 
@@ -64,12 +64,22 @@ def main(argv):
         row.append(cuisine.encode('utf-8'))
 
         items = [x.encode('utf-8') for x in test_data[i]["ingredients"]]
+        sub = False
 
         for j in range(0, len(frequent_ingredients)):
             if frequent_ingredients[j] in items:
                 row.append(1)
             else:
-                row.append(0)
+                for it in items:
+                    if frequent_ingredients[j] in it:
+                    # check if the frequent ingredient is a substring in items
+                        row.append(1)
+                        sub = True
+                        break
+                if not sub:
+                    row.append(0)
+                else:
+                    sub = False
         writer.writerow(row)
     fout.close()
 
@@ -91,7 +101,16 @@ def main(argv):
             if frequent_ingredients[j] in items:
                 row.append(1)
             else:
-                row.append(0)
+                for it in items:
+                    if frequent_ingredients[j] in it:
+                    # check if the frequent ingredient is a substring in items
+                        row.append(1)
+                        sub = True
+                        break
+                if not sub:
+                    row.append(0)
+                else:
+                    sub = False
         writer.writerow(row)
     fout.close()
 

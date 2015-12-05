@@ -1,0 +1,11 @@
+DELETE FROM Movie;
+DELETE FROM Actor;
+DELETE FROM Director;
+DELETE FROM MovieGenre;
+DELETE FROM MovieDirector;
+DELETE FROM MovieActor;
+DELETE FROM Review;
+DELETE FROM MaxPersonID;
+DELETE FROM MaxMovieID;
+
+SOURCE www/load.sql;
